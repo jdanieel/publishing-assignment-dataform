@@ -1,0 +1,6 @@
+{
+  "name": "publishing-data-analytics",
+  "dependencies": {
+    "@dataform/core": "2.4.2"
+  }
+}
