@@ -1,0 +1,61 @@
+config {
+  name: "appointments",
+  type: "table",
+  schema: "core__accuity",
+  tags: ["daily"],
+  description: `
+      Table containing the most recent state of Accuity appointments
+  `,
+  assertions: {
+    uniqueKey: ["appointment_id", "updated_at"],
+    nonNull:   ["appointment_id", "updated_at"]
+  },
+  bigquery: {
+    clusterBy: ["is_current_state"]
+  }
+}
+
+SELECT
+  appointment_id,
+  ROW_NUMBER() OVER(
+    PARTITION BY appointment_id
+    ORDER BY
+      updated_at DESC
+  ) = 1 AS is_current_state,
+  appointment_date,
+  CASE
+    WHEN canceled IS TRUE THEN 'canceled'
+    WHEN appointment_date < CURRENT_DATE() THEN 'completed'
+    WHEN appointment_date >= CURRENT_DATE() THEN 'scheduled'
+  END AS appointment_status,
+  
+  start_time,
+  end_time,
+  date_created,
+  datetime_created,
+  appointment_datetime,
+  appointment_type,
+  appointment_type_id,
+  class_id,
+  addon_id_list,
+  category,
+  duration,
+  TO_HEX(SHA256(email)) AS client_id,
+  calendar_id,
+  certificate,
+  confirmation_page,
+  confirmation_page_payment_link,
+  location,
+  notes,
+  timezone,
+  calendar_timezone,
+  labels,
+  forms_text,
+  updated_at
+FROM
+  ${
+    ref({
+      schema: 'stg__accuity',
+      name: "timeline__appointments"
+    })
+  }

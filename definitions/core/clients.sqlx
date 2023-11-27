@@ -1,0 +1,42 @@
+config {
+  name: "clients",
+  type: "table",
+  schema: "core__accuity",
+  tags: ["daily"],
+  description: `
+      Table containing the most recent state of Accuity appointments
+  `,
+  assertions: {
+    uniqueKey: ["client_id", "updated_at"],
+    nonNull:   ["client_id", "updated_at", "first_name"]
+  },
+  bigquery: {
+    clusterBy: ["is_current_state"]
+  }
+}
+
+SELECT
+  TO_HEX(SHA256(email)) AS client_id,
+  ROW_NUMBER() OVER(
+    PARTITION BY email
+    ORDER BY
+      updated_at DESC
+  ) = 1 AS is_current_state,
+  first_name,
+  last_name,
+  phone,
+  email,
+  updated_at
+FROM
+  ${
+    ref({
+      schema: 'stg__accuity',
+      name: "timeline__appointments"
+    })
+  }
+
+QUALIFY ROW_NUMBER() OVER(
+    PARTITION BY email, updated_at
+    ORDER BY
+      appointment_id DESC
+  ) = 1

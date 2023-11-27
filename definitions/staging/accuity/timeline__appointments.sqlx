@@ -1,0 +1,57 @@
+config {
+  name: "timeline__appointments",
+  type: "table",
+  schema: "stg__accuity",
+  tags: ["daily"],
+  description: `
+      Table containing the most recent state of Accuity appointments
+  `,
+  assertions: {
+    uniqueKey: ["appointment_id", "updated_at"],
+    nonNull:   ["appointment_id", "updated_at"]
+  }
+}
+
+SELECT
+  id AS appointment_id,
+  firstName AS first_name,
+  lastName AS last_name,
+  phone,
+  email,
+  PARSE_DATE('%B %d, %Y',`date`) AS appointment_date,
+  time AS start_time,
+  endTime AS end_time,
+  PARSE_DATE('%B %d, %Y',dateCreated) AS date_created,
+  PARSE_TIMESTAMP('%Y-%m-%dT%H:%M:%S%z',datetimeCreated) AS datetime_created,
+  PARSE_TIMESTAMP('%Y-%m-%dT%H:%M:%S%z',`datetime`) AS appointment_datetime,
+  CAST(price AS NUMERIC) AS price,
+  CAST(priceSold AS NUMERIC) AS price_sold,
+  paid,
+  CAST(amountPaid AS NUMERIC) AS amount_paid,
+  type AS appointment_type,
+  appointmentTypeID As appointment_type_id,
+  classID AS class_id,
+  addonIDs AS addon_id_list,
+  category,
+  CAST(duration AS INT64) AS duration,
+  calendar AS calendar_name,
+  calendarID AS calendar_id,
+  certificate,
+  confirmationPage AS confirmation_page,
+  confirmationPagePaymentLink AS confirmation_page_payment_link,
+  location,
+  notes,
+  timezone,
+  calendarTimezone AS calendar_timezone,
+  CAST(canceled AS BOOL) AS canceled,
+  labels,
+  formsText AS forms_text,
+  CAST(ingestion_time AS TIMESTAMP) AS updated_at,
+  operation_type
+FROM
+  ${
+    ref({
+      schema: 'raw__accuity',
+      name: "appointments"
+    })
+  }
