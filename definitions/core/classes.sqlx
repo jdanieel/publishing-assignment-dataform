@@ -1,0 +1,49 @@
+config {
+  name: "classes",
+  type: "table",
+  schema: "core__acuity",
+  tags: ["daily"],
+  description: `
+      Table containing the most recent state of Acuity classes
+  `,
+  assertions: {
+    uniqueKey: ["class_id", "updated_at"],
+    nonNull:   ["class_id", "updated_at"]
+  },
+  bigquery: {
+    clusterBy: ["is_current_state"]
+  }
+}
+
+SELECT
+  class_id,
+  ROW_NUMBER() OVER(
+    PARTITION BY class_id
+    ORDER BY
+      updated_at DESC
+  ) = 1 AS is_current_state,
+  appointment_date AS class_date,
+  appointment_datetime AS class_datetime,
+  CASE
+    WHEN appointment_date < CURRENT_DATE() THEN 'Completed'
+    WHEN appointment_date >= CURRENT_DATE() THEN 'Scheduled'
+  END AS class_status,
+  appointment_type_id,
+  duration,
+  calendar_id,
+  updated_at
+FROM
+  ${
+    ref({
+      schema: 'stg__acuity',
+      name: "timeline__appointments"
+    })
+  }
+WHERE
+  class_id IS NOT NULL
+
+QUALIFY ROW_NUMBER() OVER(
+    PARTITION BY class_id, updated_at
+    ORDER BY
+      appointment_id DESC
+  ) = 1
