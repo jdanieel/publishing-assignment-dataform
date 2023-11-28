@@ -1,10 +1,10 @@
 config {
   name: "appointments",
   type: "table",
-  schema: "core__accuity",
+  schema: "core__acuity",
   tags: ["daily"],
   description: `
-      Table containing the most recent state of Accuity appointments
+      Table containing the most recent state of Acuity appointments
   `,
   assertions: {
     uniqueKey: ["appointment_id", "updated_at"],
@@ -24,11 +24,10 @@ SELECT
   ) = 1 AS is_current_state,
   appointment_date,
   CASE
-    WHEN canceled IS TRUE THEN 'canceled'
-    WHEN appointment_date < CURRENT_DATE() THEN 'completed'
-    WHEN appointment_date >= CURRENT_DATE() THEN 'scheduled'
+    WHEN canceled IS TRUE THEN 'Canceled'
+    WHEN appointment_date < CURRENT_DATE() THEN 'Completed'
+    WHEN appointment_date >= CURRENT_DATE() THEN 'Scheduled'
   END AS appointment_status,
-  
   start_time,
   end_time,
   date_created,
@@ -55,7 +54,7 @@ SELECT
 FROM
   ${
     ref({
-      schema: 'stg__accuity',
+      schema: 'stg__acuity',
       name: "timeline__appointments"
     })
   }

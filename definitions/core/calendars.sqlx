@@ -1,10 +1,10 @@
 config {
   name: "calendars",
   type: "table",
-  schema: "core__accuity",
+  schema: "core__acuity",
   tags: ["daily"],
   description: `
-      Table containing the most recent state of Accuity calendars
+      Table containing the most recent state of Acuity calendars
   `,
   assertions: {
     uniqueKey: ["calendar_id", "updated_at"],
@@ -27,7 +27,7 @@ SELECT
 FROM
   ${
     ref({
-      schema: 'stg__accuity',
+      schema: 'stg__acuity',
       name: "timeline__appointments"
     })
   }
