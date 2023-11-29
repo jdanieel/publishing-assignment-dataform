@@ -25,8 +25,8 @@ SELECT
   appointment_date,
   CASE
     WHEN canceled IS TRUE THEN 'Canceled'
-    WHEN appointment_date < CURRENT_DATE() THEN 'Completed'
-    WHEN appointment_date >= CURRENT_DATE() THEN 'Scheduled'
+    WHEN appointment_datetime < CURRENT_TIMESTAMP() THEN 'Completed'
+    WHEN appointment_datetime >= CURRENT_TIMESTAMP() THEN 'Scheduled'
   END AS appointment_status,
   start_time,
   end_time,
